@@ -63,7 +63,7 @@ namespace MonoMerge.Input
             if (hit == null) return;
 
             Tile tile = hit.GetComponent<Tile>();
-            if (tile == null || tile.IsPlaced) return;
+            if (tile == null || tile.IsPlaced || !tile.IsInteractable) return;
 
             draggedTile = tile;
             dragOffset = tile.transform.position - (Vector3)worldPoint;
