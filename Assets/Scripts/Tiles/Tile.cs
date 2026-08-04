@@ -21,9 +21,13 @@ namespace MonoMerge.Tiles
         private TileTierDatabase tierDatabase;
         private SpriteRenderer spriteRenderer;
 
+        [Tooltip("Alpha applied to a tray tile while it isn't the player's turn to place it yet.")]
+        [SerializeField] private float lockedAlpha = 0.35f;
+
         public int Tier { get; private set; } = 1;
         public GridCoordinate Coordinate { get; private set; }
         public bool IsPlaced { get; private set; }
+        public bool IsInteractable { get; private set; } = true;
 
         private void Awake()
         {
@@ -45,6 +49,18 @@ namespace MonoMerge.Tiles
 
             if (spriteRenderer != null) spriteRenderer.color = definition.color;
             if (label != null) label.text = definition.label;
+        }
+
+        /// <summary>Tiles/TileSpawner: only the current tile in the tray's placement order is
+        /// interactable — the rest are dimmed and ignored by DragDropController until their turn.</summary>
+        public void SetInteractable(bool interactable)
+        {
+            IsInteractable = interactable;
+            if (spriteRenderer == null) return;
+
+            Color c = spriteRenderer.color;
+            c.a = interactable ? 1f : lockedAlpha;
+            spriteRenderer.color = c;
         }
 
         /// <summary>Called by GridManager.RegisterTile once placement is accepted into the data model.</summary>

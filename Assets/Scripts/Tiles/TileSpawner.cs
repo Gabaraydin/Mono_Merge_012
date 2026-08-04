@@ -7,6 +7,11 @@ namespace MonoMerge.Tiles
     /// GDD 1: "Spawn (Uretim): Ekranin alt kisminda her tur oyuncuya rastgele 2 veya 3 sekil
     /// verilir." Owns the spawn tray — a fixed set of slot positions below the grid — and
     /// refills it once every tile from the current batch has been placed.
+    ///
+    /// Tiles must be placed in a fixed order — rightmost slot first, then the next one to its
+    /// left, and so on — rather than freely in any order. Only the current tile in that order
+    /// is draggable (Tile.IsInteractable); the rest are dimmed. This forces the player to plan
+    /// ahead for the whole batch instead of just cherry-picking the easiest tile each turn.
     /// </summary>
     public class TileSpawner : MonoBehaviour
     {
@@ -18,6 +23,7 @@ namespace MonoMerge.Tiles
         [SerializeField] private int maxTilesPerTurn = 3;
 
         private readonly List<Tile> activeTrayTiles = new List<Tile>();
+        private readonly List<Tile> placementOrder = new List<Tile>();
 
         public IReadOnlyList<Tile> ActiveTrayTiles => activeTrayTiles;
         public bool TrayEmpty => activeTrayTiles.Count == 0;
@@ -36,15 +42,43 @@ namespace MonoMerge.Tiles
                 tile.Initialize(tier, tierDatabase);
                 activeTrayTiles.Add(tile);
             }
+
+            BuildPlacementOrder();
+        }
+
+        /// <summary>Rightmost tray slot goes first, then leftward — see class doc.</summary>
+        private void BuildPlacementOrder()
+        {
+            placementOrder.Clear();
+            for (int i = activeTrayTiles.Count - 1; i >= 0; i--)
+            {
+                placementOrder.Add(activeTrayTiles[i]);
+            }
+            RefreshInteractable();
+        }
+
+        /// <summary>Only the front of placementOrder is draggable; every other tray tile is locked.</summary>
+        private void RefreshInteractable()
+        {
+            for (int i = 0; i < placementOrder.Count; i++)
+            {
+                placementOrder[i].SetInteractable(i == 0);
+            }
         }
 
         /// <summary>Called by DragDropController once a tray tile has been successfully placed on the grid.</summary>
         public void NotifyTileConsumed(Tile tile)
         {
             activeTrayTiles.Remove(tile);
+            placementOrder.Remove(tile);
+
             if (activeTrayTiles.Count == 0)
             {
                 SpawnNextBatch();
+            }
+            else
+            {
+                RefreshInteractable();
             }
         }
 
@@ -80,6 +114,8 @@ namespace MonoMerge.Tiles
                 tile.Initialize(tiers[i], tierDatabase);
                 activeTrayTiles.Add(tile);
             }
+
+            BuildPlacementOrder();
         }
     }
 }
