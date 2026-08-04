@@ -68,15 +68,20 @@ namespace MonoMerge.Core
 
         /// <summary>GDD 1: "Oyun Sonu (Fail State): Izgarada yeni bir tas koyacak yer kalmadiginda
         /// oyun biter." Delegates to Core.GameOverChecker (Week 2) so the end condition itself
-        /// is independently testable rather than inlined here.</summary>
+        /// is independently testable rather than inlined here.
+        ///
+        /// Also re-checked while already in GameOver: DragDropController.EndDrag registers the
+        /// placed tile (firing this event) BEFORE MergeManager.CheckMergeAt resolves any merge,
+        /// so a placement that fills the last empty cell AND completes a merge would otherwise
+        /// latch into a false GameOver one event-tick too early. The merge's own RemoveTile
+        /// calls fire this event again immediately after, letting the check flip back to
+        /// Playing if the merge freed enough space.</summary>
         private void HandleGridChanged()
         {
-            if (CurrentState != GameState.Playing) return;
+            if (CurrentState != GameState.Playing && CurrentState != GameState.GameOver) return;
 
-            if (GameOverChecker.IsGameOver(GridManager.Instance))
-            {
-                SetState(GameState.GameOver);
-            }
+            bool isOver = GameOverChecker.IsGameOver(GridManager.Instance);
+            SetState(isOver ? GameState.GameOver : GameState.Playing);
         }
     }
 }
