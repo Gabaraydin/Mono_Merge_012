@@ -3,9 +3,8 @@
   GDD 3/4: AdMob entegrasyonu + cross-platform (Android) gereksinimleri.
   Bu dosya Unity'nin ürettiği taban manifest ile Gradle tarafından birleştirilir (merge).
 
-  ÖNEMLİ: APPLICATION_ID değeri şu an Google'ın herkese açık TEST App ID'sidir
-  (https://developers.google.com/admob/unity/quick-start#update_your_androidmanifestxml).
-  V1.0 mağaza gönderiminden önce AdMob konsolundaki gerçek App ID ile değiştirilmeli.
+  APPLICATION_ID değeri projenin gerçek AdMob hesabındaki App ID'dir
+  (ca-app-pub-3337422341749058~7427319010), 2026-08-04'te test ID'nin yerine kondu.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -15,6 +14,6 @@
     <application>
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-3337422341749058~7427319010" />
     </application>
 </manifest>
